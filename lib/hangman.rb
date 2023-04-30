@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'yaml'
+
 # class Game
 class Game
   attr_accessor :random_word, :solved_letters, :incorrect_letters, :available_letters
@@ -26,12 +28,6 @@ class Game
     end_game
   end
 
-  # def save_game
-  # end
-
-  # def load_game
-  # end
-
   def pick_random_word
     File.readlines('google-10000-english-no-swears.txt').sample
   end
@@ -55,7 +51,7 @@ class Game
       turn_update
       break if game_over? || game_solved?
     end
-  # save_game if @player_guess == 'save'
+    save_game if @player_guess == 'save'
   end
 
   def turn_update
@@ -75,7 +71,8 @@ class Game
   def player_guess_letter
     loop do
       incorrect_guess_list
-      @player_guess = user_input('Choose a letter.  ', /^[a-z]$|^exit$|^save$/i)
+      @player_guess = user_input('Choose a letter. Or type save to save.  ',
+                                 /^[a-z]$|^exit$|^save$/i)
       break if @player_guess.length > 1
       break if available_letters.include?(@player_guess.downcase)
     end
@@ -105,9 +102,57 @@ class Game
     puts "Victory!, your word was: #{@letters.join}" if game_solved?
     puts "Defeat!, your word was: #{@letters.join}" if game_over?
     play_again = user_input('Play again? 1 or 2 to exit. ', /^[1-2]$/)
-    puts ('Thanks for playing.') if play_again == '2'
+    puts 'Thanks for playing.' if play_again == '2'
     Game.new if play_again == '1'
   end
+end
+
+def save_game
+  Dir.mkdir('saved_games') unless Dir.exist?('saved_games')
+  puts 'Enter name of your save file: '
+  save_file = gets.chomp
+  File.open("saved_games/#{save_file}_game.yml", 'w') { |file| file.write save_to_yaml }
+end
+
+def save_to_yaml
+  YAML.dump(
+    'random_word' => @random_word,
+    'available_letters' => @available_letters,
+    'solved_letters' => @solved_letters,
+    'incorrect_letters' => @incorrect_letters
+  )
+end
+
+def find_save_file
+  file_number = user_input('Enter name of save file, or exit to leave ', /\d+|^exit$/)
+  @saved_game = file_list[file_number.to_i - 1] unless file_number == 'exit'
+end
+
+def file_list
+  files = []
+  Dir.entries('saved_games').each do |name|
+    files << name if name.match(/(game)/)
+  end
+  files
+end
+
+def load_game
+  find_save_file
+  load_file
+  player_turn
+  File.delete("saved_games/#{@saved_game}") if File.exist?
+  end_game
+rescue StandardError
+  puts 'Load Error'
+end
+
+def load_file
+  file = YAML.safe_load(File.read("saved_games/#{@saved_game}"))
+  @random_word = file['random_word']
+  @letters = random_word.delete("\n").split(//)
+  @available_letters = file['available_letters']
+  @solved_letters = file['solved_letters']
+  @incorrect_letters = file['incorrect_letters']
 end
 
 Game.new
