@@ -1,0 +1,39 @@
+---
+random_word: 'township
+
+  '
+available_letters:
+- b
+- d
+- f
+- g
+- h
+- j
+- k
+- l
+- m
+- "n"
+- p
+- q
+- r
+- s
+- t
+- v
+- w
+- x
+- "y"
+- z
+solved_letters:
+- _
+- o
+- _
+- _
+- _
+- _
+- i
+- _
+incorrect_letters:
+- a
+- u
+- e
+- c

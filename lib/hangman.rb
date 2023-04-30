@@ -107,11 +107,14 @@ class Game
   end
 end
 
+# save & loading functions
+
 def save_game
   Dir.mkdir('saved_games') unless Dir.exist?('saved_games')
   puts 'Enter name of your save file: '
-  save_file = gets.chomp
-  File.open("saved_games/#{save_file}_game.yml", 'w') { |file| file.write save_to_yaml }
+  save_name = gets.chomp
+  @filename = "#{save_name}_game.yaml"
+  File.open("saved_games/#{@filename}", 'w') { |file| file.write save_to_yaml }
 end
 
 def save_to_yaml
@@ -124,7 +127,7 @@ def save_to_yaml
 end
 
 def find_save_file
-  file_number = user_input('Enter name of save file, or exit to leave ', /\d+|^exit$/)
+  file_number = user_input('Enter index of save file, or exit to leave ', /\d+|^exit$/)
   @saved_game = file_list[file_number.to_i - 1] unless file_number == 'exit'
 end
 
